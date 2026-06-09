@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎙️ 녹음기</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --grad : linear-gradient(145deg,#0369a1 0%,#0891b2 40%,#0d9488 100%);
+      --w100 : #fff;
+      --w70  : rgba(255,255,255,.70);
+      --w30  : rgba(255,255,255,.30);
+      --w15  : rgba(255,255,255,.15);
+      --coral: #fb923c;
+      --teal : #14b8a6;
+      --red  : #ef4444;
+    }
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+    body {
+      font-family:'Noto Sans KR',system-ui,sans-serif;
+      background: var(--grad);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+
+    .box {
+      background: rgba(255,255,255,.14);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--w30);
+      border-radius: 24px;
+      padding: 36px 28px;
+      width: 100%; max-width: 340px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(2,80,130,.30);
+    }
+
+    /* ── 마이크 버튼 + 파동 ── */
+    .mic-wrap {
+      position: relative;
+      width: 110px; height: 110px;
+      margin: 0 auto 24px;
+    }
+    .ripple {
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      border: 3px solid var(--coral);
+      opacity: 0;
+      animation: ripple 2s ease-out infinite;
+      animation-play-state: paused;
+    }
+    .ripple:nth-child(2) { animation-delay: .6s; }
+    .ripple:nth-child(3) { animation-delay: 1.2s; }
+    @keyframes ripple {
+      0%   { transform: scale(.7); opacity: .7; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+    .mic-btn {
+      position: relative; z-index: 1;
+      width: 110px; height: 110px; border-radius: 50%;
+      background: linear-gradient(135deg,#fb923c,#f97316);
+      border: none; cursor: pointer; font-size: 2.8rem;
+      box-shadow: 0 6px 24px rgba(251,146,60,.45);
+      transition: transform .15s, box-shadow .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mic-btn:hover  { transform: scale(1.05); }
+    .mic-btn:active { transform: scale(.97); }
+    .mic-btn.rec    { background: linear-gradient(135deg,#ef4444,#dc2626); }
+
+    h2    { color: var(--w100); font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
+    .sub  { color: var(--w70); font-size: .82rem; margin-bottom: 24px; line-height: 1.6; }
+
+    .timer {
+      font-size: 2.8rem; font-weight: 700; color: var(--w100);
+      letter-spacing: .06em; font-variant-numeric: tabular-nums;
+      margin-bottom: 6px; min-height: 3.2rem;
+      text-shadow: 0 0 20px rgba(251,146,60,.5);
+    }
+    .timer.idle { color: var(--w30); text-shadow: none; }
+
+    .state { font-size: .85rem; color: var(--w70); margin-bottom: 24px; min-height: 1.4em; }
+
+    /* ── 버튼 2개 ── */
+    .btn-row { display: flex; gap: 10px; }
+    .btn {
+      flex: 1; padding: 13px; border: none; border-radius: 14px;
+      font-family: inherit; font-size: .9rem; font-weight: 600;
+      cursor: pointer; transition: transform .15s, opacity .15s;
+    }
+    .btn:disabled { opacity: .3; cursor: not-allowed; }
+    .btn:not(:disabled):hover { transform: translateY(-1px); }
+    .btn-stop { background: linear-gradient(135deg,#64748b,#475569); color:#fff; }
+    .btn-send { background: linear-gradient(135deg,#14b8a6,#10b981); color:#fff; }
+
+    /* ── 진행 바 ── */
+    .prog {
+      display: none; margin-top: 16px;
+      height: 5px; background: var(--w15); border-radius: 99px; overflow: hidden;
+    }
+    .prog-fill {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg,#38bdf8,#14b8a6);
+      background-size: 200%;
+      animation: sh 1.3s linear infinite;
+    }
+    @keyframes sh { 0%{background-position:100%} 100%{background-position:-100%} }
+
+    /* ── 완료 ── */
+    .done {
+      display: none; flex-direction: column;
+      align-items: center; gap: 12px; padding: 8px 0;
+    }
+    .done-circle {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg,#14b8a6,#10b981);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      animation: popIn .4s cubic-bezier(.17,.89,.32,1.28);
+      box-shadow: 0 0 0 10px rgba(20,184,166,.18);
+    }
+    @keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
+    .done-msg { color: var(--w100); font-size: .95rem; font-weight: 600; }
+    .done-sub { color: var(--w70); font-size: .78rem; }
+
+    /* ── 오류 ── */
+    .err {
+      display: none;
+      background: rgba(239,68,68,.15);
+      border: 1px solid rgba(239,68,68,.4);
+      border-radius: 12px; padding: 12px 14px;
+      font-size: .82rem; color: #fca5a5;
+      line-height: 1.6; margin-top: 12px; text-align: left;
+    }
+  </style>
+</head>
+<body>
+<div class="box">
+
+  <div class="mic-wrap" id="micWrap">
+    <div class="ripple" id="r1"></div>
+    <div class="ripple" id="r2"></div>
+    <div class="ripple" id="r3"></div>
+    <button class="mic-btn" id="micBtn" onclick="toggleRec()">🎙️</button>
+  </div>
+
+  <h2 id="title">녹음을 시작하세요</h2>
+  <p class="sub" id="sub">버튼을 눌러 녹음을 시작합니다.<br>완료 후 '전송' 버튼을 누르세요.</p>
+
+  <div class="timer idle" id="timer">00:00</div>
+  <div class="state" id="state">대기 중</div>
+
+  <div class="btn-row">
+    <button class="btn btn-stop" id="btnStop" onclick="stopRec()"   disabled>⏹ 중지</button>
+    <button class="btn btn-send" id="btnSend" onclick="sendAudio()" disabled>✈️ 전송</button>
+  </div>
+
+  <div class="prog" id="prog"><div class="prog-fill"></div></div>
+
+  <div class="done" id="done">
+    <div class="done-circle">✓</div>
+    <div class="done-msg">전송 완료!</div>
+    <div class="done-sub">이 창은 닫아도 됩니다.</div>
+  </div>
+
+  <div class="err" id="err"></div>
+
+</div>
+
+<script>
+  // ── 전달받을 Apps Script 웹앱 origin ──────────────────
+  // opener 의 origin 을 동적으로 사용 (보안상 '*' 도 가능)
+  const TARGET_ORIGIN = '*';
+
+  // ── 상태 ──────────────────────────────────────────────
+  let mediaRecorder = null;
+  let audioChunks   = [];
+  let audioBlob     = null;
+  let timerItv      = null;
+  let elapsed       = 0;
+  let isRec         = false;
+  let mimeType      = '';
+
+  // ── 파동 제어 ─────────────────────────────────────────
+  function rippleOn(on) {
+    ['r1','r2','r3'].forEach(function(id) {
+      const el = document.getElementById(id);
+      el.style.animationPlayState = on ? 'running' : 'paused';
+      el.style.opacity = on ? '' : '0';
+    });
+  }
+  rippleOn(false);
+
+  // ── 타이머 ────────────────────────────────────────────
+  function tickTimer() {
+    elapsed++;
+    const m = String(Math.floor(elapsed / 60)).padStart(2,'0');
+    const s = String(elapsed % 60).padStart(2,'0');
+    const el = document.getElementById('timer');
+    el.textContent = m + ':' + s;
+    el.classList.remove('idle');
+  }
+
+  // ── 녹음 시작 / 토글 ──────────────────────────────────
+  async function toggleRec() {
+    if (isRec) { stopRec(); return; }
+    hideErr();
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 16000 }
+      });
+
+      mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : (MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg');
+
+      mediaRecorder = new MediaRecorder(stream, { mimeType });
+      audioChunks   = [];
+
+      mediaRecorder.ondataavailable = function(e) {
+        if (e.data.size > 0) audioChunks.push(e.data);
+      };
+      mediaRecorder.onstop = function() {
+        audioBlob = new Blob(audioChunks, { type: mimeType });
+        stream.getTracks().forEach(function(t) { t.stop(); });
+        onDone();
+      };
+
+      mediaRecorder.start(1000);
+      isRec   = true;
+      elapsed = 0;
+      timerItv = setInterval(tickTimer, 1000);
+
+      document.getElementById('micBtn').classList.add('rec');
+      document.getElementById('micBtn').textContent = '⏸';
+      document.getElementById('title').textContent  = '녹음 중...';
+      document.getElementById('sub').textContent    = '다시 버튼을 누르면 중지됩니다.';
+      document.getElementById('state').textContent  = '🔴 REC';
+      document.getElementById('btnStop').disabled   = false;
+      document.getElementById('btnSend').disabled   = true;
+      rippleOn(true);
+
+    } catch(err) {
+      showErr(errMsg(err));
+    }
+  }
+
+  // ── 녹음 중지 ─────────────────────────────────────────
+  function stopRec() {
+    if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+    clearInterval(timerItv);
+    isRec = false;
+    rippleOn(false);
+    mediaRecorder.stop();
+    document.getElementById('btnStop').disabled  = true;
+    document.getElementById('micBtn').disabled   = true;
+    document.getElementById('state').textContent = '⏳ 처리 중...';
+  }
+
+  // ── 녹음 완료 ─────────────────────────────────────────
+  function onDone() {
+    const sizeMB = (audioBlob.size / 1024 / 1024).toFixed(2);
+    document.getElementById('micBtn').textContent  = '✅';
+    document.getElementById('title').textContent   = '녹음 완료!';
+    document.getElementById('sub').innerHTML       =
+      '크기: <b>' + sizeMB + ' MB</b> &nbsp;|&nbsp; 시간: <b>' +
+      document.getElementById('timer').textContent + '</b>';
+    document.getElementById('state').textContent   = '전송 버튼을 눌러 주세요';
+    document.getElementById('btnSend').disabled    = false;
+  }
+
+  // ── 전송 (postMessage → opener) ───────────────────────
+  async function sendAudio() {
+    if (!audioBlob) return;
+    document.getElementById('btnSend').disabled    = true;
+    document.getElementById('state').textContent   = '전송 중...';
+    document.getElementById('prog').style.display  = 'block';
+
+    try {
+      const base64 = await toBase64(audioBlob);
+
+      if (!window.opener || window.opener.closed) {
+        throw new Error('메인 창을 찾을 수 없습니다.');
+      }
+
+      window.opener.postMessage({
+        type        : 'RECORDER_AUDIO',
+        audioBase64 : base64,
+        mimeType    : mimeType,
+        duration    : elapsed,
+        fileName    : makeFileName()
+      }, TARGET_ORIGIN);
+
+      document.getElementById('prog').style.display  = 'none';
+      document.getElementById('done').style.display  = 'flex';
+      document.getElementById('state').textContent   = '';
+      setTimeout(function() { window.close(); }, 3000);
+
+    } catch(err) {
+      document.getElementById('prog').style.display  = 'none';
+      document.getElementById('btnSend').disabled    = false;
+      showErr('전송 실패: ' + err.message);
+    }
+  }
+
+  // ── 유틸 ──────────────────────────────────────────────
+  function makeFileName() {
+    const d   = new Date();
+    const pad = function(n) { return String(n).padStart(2,'0'); };
+    return 'rec_' + d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate())
+         + '_' + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds()) + '.webm';
+  }
+
+  function toBase64(blob) {
+    return new Promise(function(resolve, reject) {
+      const r = new FileReader();
+      r.onloadend = function() { resolve(r.result.split(',')[1]); };
+      r.onerror   = reject;
+      r.readAsDataURL(blob);
+    });
+  }
+
+  function errMsg(err) {
+    const map = {
+      'NotAllowedError' : '⛔ 마이크 권한이 거부되었습니다.\n주소창 왼쪽 아이콘 → 마이크 → 허용 후 새로고침해 주세요.',
+      'NotFoundError'   : '🎤 마이크를 찾을 수 없습니다.',
+      'NotReadableError': '⚠️ 마이크가 다른 앱에서 사용 중입니다.',
+      'SecurityError'   : '🔒 HTTPS 환경이 필요합니다.'
+    };
+    return map[err.name] || ('오류: ' + err.name + ' — ' + err.message);
+  }
+
+  function showErr(msg) {
+    const el = document.getElementById('err');
+    el.textContent = msg; el.style.display = 'block';
+  }
+  function hideErr() { document.getElementById('err').style.display = 'none'; }
+</script>
+</body>
+</html>
