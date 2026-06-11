@@ -203,7 +203,13 @@
     GEMINI_KEY = decodeURIComponent(urlParams.get('key'));
   }
 
-  var GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=';
+  // Gemini 모델 폴백 목록 (503/429 시 순서대로 시도)
+  var GEMINI_MODELS = [
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite',
+    'gemini-3.5-flash'
+  ];
+  var GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/';
 
   // ── 상태 ──────────────────────────────────────────────
   var mediaRecorder = null;
@@ -353,29 +359,80 @@
         '9. 오디오 끝까지 빠짐없이 전사\n' +
         '10. 마지막 줄에 "---END---" 추가';
 
-      var resp = await fetch(GEMINI_URL + GEMINI_KEY, {
-        method : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body   : JSON.stringify({
-          contents: [{
-            parts: [
-              { text: prompt },
-              { inline_data: { mime_type: mimeType, data: base64 } }
-            ]
-          }],
-          generationConfig: { temperature: 0.4, maxOutputTokens: 65536 }
-        })
-      });
+      // ── Gemini 호출: 재시도 + 모델 폴백 ────────────────
+      var rawText  = '';
+      var lastErr  = '';
+      var MAX_RETRY = 3;
+      var RETRY_MS  = 4000;
+      var succeeded = false;
 
-      if (!resp.ok) {
-        var errData = await resp.json();
-        throw new Error('Gemini 오류 (' + resp.status + '): ' +
-          (errData.error ? errData.error.message : resp.statusText));
+      for (var mi = 0; mi < GEMINI_MODELS.length && !succeeded; mi++) {
+        var model = GEMINI_MODELS[mi];
+        var url   = GEMINI_BASE + model + ':generateContent?key=' + GEMINI_KEY;
+
+        for (var retry = 0; retry < MAX_RETRY && !succeeded; retry++) {
+
+          if (retry > 0) {
+            showProg('⏳ 503 과부하 — ' + (retry) + '/' + (MAX_RETRY-1) + '번째 재시도 중... (' + model + ')');
+            await sleep_(RETRY_MS);
+          } else if (mi > 0) {
+            showProg('🔄 모델 전환: ' + model + ' 으로 재시도 중...');
+          }
+
+          try {
+            var resp = await fetch(url, {
+              method : 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body   : JSON.stringify({
+                contents: [{
+                  parts: [
+                    { text: prompt },
+                    { inline_data: { mime_type: mimeType, data: base64 } }
+                  ]
+                }],
+                generationConfig: { temperature: 0.4, maxOutputTokens: 65536 }
+              })
+            });
+
+            if (resp.status === 503 || resp.status === 429) {
+              var errData = await resp.json();
+              lastErr = 'HTTP ' + resp.status + ': ' +
+                (errData.error ? errData.error.message : resp.statusText);
+              document.getElementById('stateMsg').textContent =
+                '⚠️ ' + resp.status + ' 과부하 — 잠시 후 재시도 합니다... (' + model + ')';
+              continue;  // 재시도
+            }
+
+            if (!resp.ok) {
+              var errData2 = await resp.json();
+              lastErr = 'HTTP ' + resp.status + ': ' +
+                (errData2.error ? errData2.error.message : resp.statusText);
+              break;  // 다른 종류 오류는 즉시 다음 모델로
+            }
+
+            var data = await resp.json();
+            if (!data.candidates || !data.candidates[0]) {
+              lastErr = '응답에 결과가 없습니다.';
+              break;
+            }
+
+            rawText   = (data.candidates[0].content.parts[0].text || '')
+                        .replace('---END---', '').trim();
+            succeeded = true;
+            if (mi > 0 || retry > 0) {
+              document.getElementById('stateMsg').textContent =
+                '✅ 성공 (모델: ' + model + ', 재시도: ' + retry + '회)';
+            }
+
+          } catch(fetchErr) {
+            lastErr = fetchErr.message;
+          }
+        }
       }
 
-      var data    = await resp.json();
-      var rawText = data.candidates[0].content.parts[0].text || '';
-      rawText = rawText.replace('---END---', '').trim();
+      if (!succeeded) {
+        throw new Error('Gemini STT 실패. 모든 모델 재시도 후 포기.\n마지막 오류: ' + lastErr);
+      }
 
       // 미리보기 표시
       document.getElementById('previewText').textContent =
@@ -420,6 +477,11 @@
     var d = new Date(), p = function(n){ return String(n).padStart(2,'0'); };
     return 'rec_' + d.getFullYear() + p(d.getMonth()+1) + p(d.getDate())
          + '_' + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds()) + '.webm';
+  }
+
+  // ── 비동기 대기 ────────────────────────────────────
+  function sleep_(ms) {
+    return new Promise(function(resolve){ setTimeout(resolve, ms); });
   }
 
   function blobToBase64(blob) {
