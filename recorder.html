@@ -9,136 +9,141 @@
     :root {
       --grad : linear-gradient(145deg,#0369a1 0%,#0891b2 40%,#0d9488 100%);
       --w100 : #fff;
-      --w70  : rgba(255,255,255,.70);
+      --w80  : rgba(255,255,255,.80);
+      --w60  : rgba(255,255,255,.60);
       --w30  : rgba(255,255,255,.30);
       --w15  : rgba(255,255,255,.15);
+      --w08  : rgba(255,255,255,.08);
       --coral: #fb923c;
       --teal : #14b8a6;
+      --green: #10b981;
       --red  : #ef4444;
     }
     *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-
     body {
       font-family:'Noto Sans KR',system-ui,sans-serif;
-      background: var(--grad);
-      min-height: 100vh;
-      display: flex; align-items: center; justify-content: center;
-      padding: 20px;
+      background:var(--grad); min-height:100vh;
+      display:flex; align-items:center; justify-content:center; padding:20px;
     }
-
     .box {
-      background: rgba(255,255,255,.14);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--w30);
-      border-radius: 24px;
-      padding: 36px 28px;
-      width: 100%; max-width: 340px;
-      text-align: center;
-      box-shadow: 0 8px 32px rgba(2,80,130,.30);
+      background:rgba(255,255,255,.14); backdrop-filter:blur(20px);
+      border:1px solid var(--w30); border-radius:24px;
+      padding:32px 24px; width:100%; max-width:360px;
+      text-align:center; box-shadow:0 8px 32px rgba(2,80,130,.30);
     }
 
-    /* ── 마이크 버튼 + 파동 ── */
-    .mic-wrap {
-      position: relative;
-      width: 110px; height: 110px;
-      margin: 0 auto 24px;
-    }
+    /* ── 마이크 버튼 ── */
+    .mic-wrap { position:relative; width:100px; height:100px; margin:0 auto 20px; }
     .ripple {
-      position: absolute; inset: 0;
-      border-radius: 50%;
-      border: 3px solid var(--coral);
-      opacity: 0;
-      animation: ripple 2s ease-out infinite;
-      animation-play-state: paused;
+      position:absolute; inset:0; border-radius:50%;
+      border:3px solid var(--coral); opacity:0;
+      animation:ripple 2s ease-out infinite;
+      animation-play-state:paused;
     }
-    .ripple:nth-child(2) { animation-delay: .6s; }
-    .ripple:nth-child(3) { animation-delay: 1.2s; }
-    @keyframes ripple {
-      0%   { transform: scale(.7); opacity: .7; }
-      100% { transform: scale(1.6); opacity: 0; }
-    }
+    .ripple:nth-child(2){ animation-delay:.6s; }
+    .ripple:nth-child(3){ animation-delay:1.2s; }
+    @keyframes ripple { 0%{transform:scale(.7);opacity:.7} 100%{transform:scale(1.6);opacity:0} }
     .mic-btn {
-      position: relative; z-index: 1;
-      width: 110px; height: 110px; border-radius: 50%;
-      background: linear-gradient(135deg,#fb923c,#f97316);
-      border: none; cursor: pointer; font-size: 2.8rem;
-      box-shadow: 0 6px 24px rgba(251,146,60,.45);
-      transition: transform .15s, box-shadow .15s;
-      display: flex; align-items: center; justify-content: center;
+      position:relative; z-index:1; width:100px; height:100px;
+      border-radius:50%; background:linear-gradient(135deg,#fb923c,#f97316);
+      border:none; cursor:pointer; font-size:2.6rem;
+      box-shadow:0 6px 24px rgba(251,146,60,.45);
+      transition:transform .15s; display:flex; align-items:center; justify-content:center;
     }
-    .mic-btn:hover  { transform: scale(1.05); }
-    .mic-btn:active { transform: scale(.97); }
-    .mic-btn.rec    { background: linear-gradient(135deg,#ef4444,#dc2626); }
+    .mic-btn:hover { transform:scale(1.05); }
+    .mic-btn.rec   { background:linear-gradient(135deg,#ef4444,#dc2626); }
+    .mic-btn:disabled { opacity:.4; cursor:not-allowed; transform:none; }
 
-    h2    { color: var(--w100); font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; }
-    .sub  { color: var(--w70); font-size: .82rem; margin-bottom: 24px; line-height: 1.6; }
+    /* ── 텍스트 ── */
+    h2   { color:var(--w100); font-size:1.1rem; font-weight:700; margin-bottom:6px; }
+    .sub { color:var(--w60); font-size:.8rem; margin-bottom:20px; line-height:1.6; }
 
     .timer {
-      font-size: 2.8rem; font-weight: 700; color: var(--w100);
-      letter-spacing: .06em; font-variant-numeric: tabular-nums;
-      margin-bottom: 6px; min-height: 3.2rem;
-      text-shadow: 0 0 20px rgba(251,146,60,.5);
+      font-size:2.6rem; font-weight:700; color:var(--w100);
+      letter-spacing:.06em; font-variant-numeric:tabular-nums;
+      margin-bottom:4px; min-height:3rem;
+      text-shadow:0 0 20px rgba(251,146,60,.5);
     }
-    .timer.idle { color: var(--w30); text-shadow: none; }
+    .timer.idle { color:var(--w30); text-shadow:none; }
+    .state-msg  { font-size:.82rem; color:var(--w60); margin-bottom:20px; min-height:1.4em; }
 
-    .state { font-size: .85rem; color: var(--w70); margin-bottom: 24px; min-height: 1.4em; }
+    /* ── 단계 표시 ── */
+    .step-indicator {
+      display:flex; justify-content:center; gap:8px; margin-bottom:20px;
+    }
+    .step {
+      display:flex; align-items:center; gap:6px;
+      font-size:.72rem; color:var(--w30); font-weight:600;
+      padding:5px 10px; border-radius:20px;
+      border:1px solid var(--w15); background:var(--w08);
+      transition:all .3s;
+    }
+    .step.active { color:var(--coral); border-color:rgba(251,146,60,.5); background:rgba(251,146,60,.1); }
+    .step.done   { color:var(--green); border-color:rgba(16,185,129,.5); background:rgba(16,185,129,.1); }
+    .step-dot    { width:6px; height:6px; border-radius:50%; background:currentColor; }
 
-    /* ── 버튼 2개 ── */
-    .btn-row { display: flex; gap: 10px; }
+    /* ── 버튼 ── */
+    .btn-row { display:flex; gap:10px; }
     .btn {
-      flex: 1; padding: 13px; border: none; border-radius: 14px;
-      font-family: inherit; font-size: .9rem; font-weight: 600;
-      cursor: pointer; transition: transform .15s, opacity .15s;
+      flex:1; padding:13px; border:none; border-radius:14px;
+      font-family:inherit; font-size:.88rem; font-weight:600;
+      cursor:pointer; transition:transform .15s, opacity .15s;
     }
-    .btn:disabled { opacity: .3; cursor: not-allowed; }
-    .btn:not(:disabled):hover { transform: translateY(-1px); }
-    .btn-stop { background: linear-gradient(135deg,#64748b,#475569); color:#fff; }
-    .btn-send { background: linear-gradient(135deg,#14b8a6,#10b981); color:#fff; }
+    .btn:disabled { opacity:.3; cursor:not-allowed; }
+    .btn:not(:disabled):hover { transform:translateY(-1px); }
+    .btn-stop { background:linear-gradient(135deg,#64748b,#475569); color:#fff; }
+    .btn-send { background:linear-gradient(135deg,#14b8a6,#10b981); color:#fff; }
 
     /* ── 진행 바 ── */
-    .prog {
-      display: none; margin-top: 16px;
-      height: 5px; background: var(--w15); border-radius: 99px; overflow: hidden;
-    }
+    .prog-wrap { margin-top:16px; display:none; }
+    .prog-lbl  { font-size:.75rem; color:var(--w60); margin-bottom:6px; text-align:left; }
+    .prog-track{ height:5px; background:var(--w15); border-radius:99px; overflow:hidden; }
     .prog-fill {
-      height: 100%; border-radius: 99px;
-      background: linear-gradient(90deg,#38bdf8,#14b8a6);
-      background-size: 200%;
-      animation: sh 1.3s linear infinite;
+      height:100%; border-radius:99px;
+      background:linear-gradient(90deg,#38bdf8,#14b8a6);
+      background-size:200%; animation:sh 1.3s linear infinite;
+      transition:width .3s;
     }
     @keyframes sh { 0%{background-position:100%} 100%{background-position:-100%} }
 
-    /* ── 완료 ── */
+    /* ── STT 결과 미리보기 ── */
+    .preview-wrap {
+      display:none; margin-top:16px; text-align:left;
+      background:var(--w08); border:1px solid var(--w15); border-radius:12px; padding:12px;
+      max-height:150px; overflow-y:auto;
+    }
+    .preview-title { font-size:.72rem; color:var(--w60); margin-bottom:6px; font-weight:600; }
+    .preview-text  { font-size:.78rem; color:var(--w80); line-height:1.6; white-space:pre-wrap; }
+
+    /* ── 완료 / 오류 ── */
     .done {
-      display: none; flex-direction: column;
-      align-items: center; gap: 12px; padding: 8px 0;
+      display:none; flex-direction:column;
+      align-items:center; gap:10px; padding:6px 0;
     }
     .done-circle {
-      width: 56px; height: 56px; border-radius: 50%;
-      background: linear-gradient(135deg,#14b8a6,#10b981);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.8rem;
-      animation: popIn .4s cubic-bezier(.17,.89,.32,1.28);
-      box-shadow: 0 0 0 10px rgba(20,184,166,.18);
+      width:52px; height:52px; border-radius:50%;
+      background:linear-gradient(135deg,#14b8a6,#10b981);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.6rem; animation:popIn .4s cubic-bezier(.17,.89,.32,1.28);
+      box-shadow:0 0 0 10px rgba(20,184,166,.15);
     }
     @keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
-    .done-msg { color: var(--w100); font-size: .95rem; font-weight: 600; }
-    .done-sub { color: var(--w70); font-size: .78rem; }
+    .done-msg { color:var(--w100); font-size:.9rem; font-weight:600; }
+    .done-sub { color:var(--w60); font-size:.75rem; }
 
-    /* ── 오류 ── */
-    .err {
-      display: none;
-      background: rgba(239,68,68,.15);
-      border: 1px solid rgba(239,68,68,.4);
-      border-radius: 12px; padding: 12px 14px;
-      font-size: .82rem; color: #fca5a5;
-      line-height: 1.6; margin-top: 12px; text-align: left;
+    .err-box {
+      display:none; background:rgba(239,68,68,.15);
+      border:1px solid rgba(239,68,68,.4);
+      border-radius:12px; padding:12px 14px;
+      font-size:.8rem; color:#fca5a5;
+      line-height:1.6; margin-top:12px; text-align:left;
     }
   </style>
 </head>
 <body>
 <div class="box">
 
+  <!-- 마이크 버튼 -->
   <div class="mic-wrap" id="micWrap">
     <div class="ripple" id="r1"></div>
     <div class="ripple" id="r2"></div>
@@ -147,69 +152,106 @@
   </div>
 
   <h2 id="title">녹음을 시작하세요</h2>
-  <p class="sub" id="sub">버튼을 눌러 녹음을 시작합니다.<br>완료 후 '전송' 버튼을 누르세요.</p>
+  <p class="sub" id="sub">버튼을 눌러 녹음을 시작합니다.<br>완료 후 전송 버튼을 누르세요.</p>
 
-  <div class="timer idle" id="timer">00:00</div>
-  <div class="state" id="state">대기 중</div>
-
-  <div class="btn-row">
-    <button class="btn btn-stop" id="btnStop" onclick="stopRec()"   disabled>⏹ 중지</button>
-    <button class="btn btn-send" id="btnSend" onclick="sendAudio()" disabled>✈️ 전송</button>
+  <!-- 단계 표시 -->
+  <div class="step-indicator">
+    <div class="step" id="step1"><span class="step-dot"></span>녹음</div>
+    <div class="step" id="step2"><span class="step-dot"></span>STT 변환</div>
+    <div class="step" id="step3"><span class="step-dot"></span>전송</div>
   </div>
 
-  <div class="prog" id="prog"><div class="prog-fill"></div></div>
+  <div class="timer idle" id="timer">00:00</div>
+  <div class="state-msg" id="stateMsg">대기 중</div>
 
+  <!-- 버튼 -->
+  <div class="btn-row">
+    <button class="btn btn-stop" id="btnStop"  onclick="stopRec()"   disabled>⏹ 중지</button>
+    <button class="btn btn-send" id="btnSend"  onclick="startSTT()"  disabled>✨ 변환+전송</button>
+  </div>
+
+  <!-- 진행 바 -->
+  <div class="prog-wrap" id="progWrap">
+    <div class="prog-lbl" id="progLbl">처리 중...</div>
+    <div class="prog-track"><div class="prog-fill" id="progFill" style="width:30%"></div></div>
+  </div>
+
+  <!-- STT 미리보기 -->
+  <div class="preview-wrap" id="previewWrap">
+    <div class="preview-title">📝 변환된 텍스트 미리보기</div>
+    <div class="preview-text" id="previewText"></div>
+  </div>
+
+  <!-- 완료 -->
   <div class="done" id="done">
     <div class="done-circle">✓</div>
     <div class="done-msg">전송 완료!</div>
-    <div class="done-sub">이 창은 닫아도 됩니다.</div>
+    <div class="done-sub" id="doneSub">이 창은 닫아도 됩니다.</div>
   </div>
 
-  <div class="err" id="err"></div>
+  <!-- 오류 -->
+  <div class="err-box" id="errBox"></div>
 
 </div>
 
 <script>
-  // ── 전달받을 Apps Script 웹앱 origin ──────────────────
-  // opener 의 origin 을 동적으로 사용 (보안상 '*' 도 가능)
-  const TARGET_ORIGIN = '*';
+  // ── 설정: URL 파라미터에서 Gemini API Key 수신 ────────
+  // Index.html 에서 팝업 열 때 ?key=... 로 전달
+  var GEMINI_KEY = '';
+  var urlParams  = new URLSearchParams(window.location.search);
+  if (urlParams.get('key')) {
+    GEMINI_KEY = decodeURIComponent(urlParams.get('key'));
+  }
+
+  var GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=';
 
   // ── 상태 ──────────────────────────────────────────────
-  let mediaRecorder = null;
-  let audioChunks   = [];
-  let audioBlob     = null;
-  let timerItv      = null;
-  let elapsed       = 0;
-  let isRec         = false;
-  let mimeType      = '';
+  var mediaRecorder = null;
+  var audioChunks   = [];
+  var audioBlob     = null;
+  var timerItv      = null;
+  var elapsed       = 0;
+  var isRec         = false;
+  var mimeType      = '';
 
   // ── 파동 제어 ─────────────────────────────────────────
   function rippleOn(on) {
-    ['r1','r2','r3'].forEach(function(id) {
-      const el = document.getElementById(id);
+    ['r1','r2','r3'].forEach(function(id){
+      var el = document.getElementById(id);
       el.style.animationPlayState = on ? 'running' : 'paused';
       el.style.opacity = on ? '' : '0';
     });
   }
   rippleOn(false);
 
+  // ── 단계 표시 ─────────────────────────────────────────
+  function setStep(active) {
+    ['step1','step2','step3'].forEach(function(id, i){
+      var el = document.getElementById(id);
+      el.className = 'step' +
+        (i + 1 < active ? ' done' : '') +
+        (i + 1 === active ? ' active' : '');
+    });
+  }
+  setStep(1);
+
   // ── 타이머 ────────────────────────────────────────────
   function tickTimer() {
     elapsed++;
-    const m = String(Math.floor(elapsed / 60)).padStart(2,'0');
-    const s = String(elapsed % 60).padStart(2,'0');
-    const el = document.getElementById('timer');
+    var m = String(Math.floor(elapsed/60)).padStart(2,'0');
+    var s = String(elapsed%60).padStart(2,'0');
+    var el = document.getElementById('timer');
     el.textContent = m + ':' + s;
     el.classList.remove('idle');
   }
 
-  // ── 녹음 시작 / 토글 ──────────────────────────────────
+  // ── 녹음 시작/토글 ────────────────────────────────────
   async function toggleRec() {
     if (isRec) { stopRec(); return; }
     hideErr();
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      var stream = await navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 16000 }
       });
 
@@ -218,18 +260,16 @@
         : (MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/ogg');
 
       mediaRecorder = new MediaRecorder(stream, {
-  mimeType           : mimeType,
-  audioBitsPerSecond : 32000
-});
-      audioChunks   = [];
+        mimeType          : mimeType,
+        audioBitsPerSecond: 32000   // 32kbps → 1시간 약 14MB
+      });
+      audioChunks = [];
 
-      mediaRecorder.ondataavailable = function(e) {
-        if (e.data.size > 0) audioChunks.push(e.data);
-      };
-      mediaRecorder.onstop = function() {
+      mediaRecorder.ondataavailable = function(e){ if(e.data.size > 0) audioChunks.push(e.data); };
+      mediaRecorder.onstop = function(){
         audioBlob = new Blob(audioChunks, { type: mimeType });
-        stream.getTracks().forEach(function(t) { t.stop(); });
-        onDone();
+        stream.getTracks().forEach(function(t){ t.stop(); });
+        onRecDone();
       };
 
       mediaRecorder.start(1000);
@@ -238,12 +278,14 @@
       timerItv = setInterval(tickTimer, 1000);
 
       document.getElementById('micBtn').classList.add('rec');
-      document.getElementById('micBtn').textContent = '⏸';
-      document.getElementById('title').textContent  = '녹음 중...';
-      document.getElementById('sub').textContent    = '다시 버튼을 누르면 중지됩니다.';
-      document.getElementById('state').textContent  = '🔴 REC';
-      document.getElementById('btnStop').disabled   = false;
-      document.getElementById('btnSend').disabled   = true;
+      document.getElementById('micBtn').textContent  = '⏸';
+      document.getElementById('title').textContent   = '녹음 중...';
+      document.getElementById('sub').textContent     = '다시 누르면 중지됩니다.';
+      document.getElementById('stateMsg').textContent= '🔴 REC';
+      document.getElementById('btnStop').disabled    = false;
+      document.getElementById('btnSend').disabled    = true;
+      document.getElementById('previewWrap').style.display = 'none';
+      setStep(1);
       rippleOn(true);
 
     } catch(err) {
@@ -258,89 +300,158 @@
     isRec = false;
     rippleOn(false);
     mediaRecorder.stop();
-    document.getElementById('btnStop').disabled  = true;
-    document.getElementById('micBtn').disabled   = true;
-    document.getElementById('state').textContent = '⏳ 처리 중...';
+    document.getElementById('btnStop').disabled     = true;
+    document.getElementById('micBtn').disabled      = true;
+    document.getElementById('stateMsg').textContent = '⏳ 처리 중...';
   }
 
   // ── 녹음 완료 ─────────────────────────────────────────
-  function onDone() {
-    const sizeMB = (audioBlob.size / 1024 / 1024).toFixed(2);
-    document.getElementById('micBtn').textContent  = '✅';
-    document.getElementById('title').textContent   = '녹음 완료!';
-    document.getElementById('sub').innerHTML       =
-      '크기: <b>' + sizeMB + ' MB</b> &nbsp;|&nbsp; 시간: <b>' +
-      document.getElementById('timer').textContent + '</b>';
-    document.getElementById('state').textContent   = '전송 버튼을 눌러 주세요';
-    document.getElementById('btnSend').disabled    = false;
+  function onRecDone() {
+    var sizeMB = (audioBlob.size / 1024 / 1024).toFixed(1);
+    document.getElementById('micBtn').textContent   = '✅';
+    document.getElementById('title').textContent    = '녹음 완료!';
+    document.getElementById('sub').innerHTML        = '크기: <b>' + sizeMB + ' MB</b>  ·  시간: <b>' + document.getElementById('timer').textContent + '</b>';
+    document.getElementById('stateMsg').textContent = '변환+전송 버튼을 눌러 주세요';
+    document.getElementById('btnSend').disabled     = false;
   }
 
-  // ── 전송 (postMessage → opener) ───────────────────────
-  async function sendAudio() {
+  // ══════════════════════════════════════════════════════
+  //  ★ 핵심: Gemini STT를 브라우저에서 직접 호출
+  //  Apps Script 6분 제한 완전 우회!
+  // ══════════════════════════════════════════════════════
+  async function startSTT() {
     if (!audioBlob) return;
-    document.getElementById('btnSend').disabled    = true;
-    document.getElementById('state').textContent   = '전송 중...';
-    document.getElementById('prog').style.display  = 'block';
+
+    document.getElementById('btnSend').disabled  = true;
+    document.getElementById('micBtn').disabled   = true;
+    setStep(2);
+    showProg('🤖 Gemini AI 음성 → 텍스트 변환 중...');
+    document.getElementById('stateMsg').textContent = 'AI가 음성을 텍스트로 변환 중...\n(파일 크기에 따라 1~4분 소요)';
 
     try {
-      const base64 = await toBase64(audioBlob);
+      // Base64 변환
+      var base64 = await blobToBase64(audioBlob);
+      var sizeMB = (audioBlob.size / 1024 / 1024).toFixed(1);
+
+      // Gemini API 직접 호출
+      var durMin = String(Math.floor(elapsed/60)).padStart(2,'0');
+      var durSec = String(elapsed%60).padStart(2,'0');
+
+      var prompt =
+        '업로드된 오디오 파일(' + durMin + ':' + durSec + ' 분량)의 내용을 ' +
+        '한국어로 정확하게 텍스트 변환해 주세요.\n\n' +
+        '출력 형식 (반드시 준수):\n[MM:SS] 텍스트 내용\n\n' +
+        '엄수 규칙:\n' +
+        '1. 타임스탬프 형식은 반드시 [MM:SS] 만 사용 (* 등 특수문자 금지)\n' +
+        '2. 새 타임스탬프는 반드시 새 줄에서 시작\n' +
+        '3. 한 줄에 타임스탬프는 반드시 1개만 사용\n' +
+        '4. 30초 단위로 타임스탬프 구분\n' +
+        '5. 화자 2명 이상이면 [화자A], [화자B] 로 구분\n' +
+        '6. 불명확한 발음은 [불명확] 표시\n' +
+        '7. 동일한 단어나 문장 반복 금지\n' +
+        '8. 원문 그대로 전사 (요약 금지)\n' +
+        '9. 오디오 끝까지 빠짐없이 전사\n' +
+        '10. 마지막 줄에 "---END---" 추가';
+
+      var resp = await fetch(GEMINI_URL + GEMINI_KEY, {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({
+          contents: [{
+            parts: [
+              { text: prompt },
+              { inline_data: { mime_type: mimeType, data: base64 } }
+            ]
+          }],
+          generationConfig: { temperature: 0.4, maxOutputTokens: 65536 }
+        })
+      });
+
+      if (!resp.ok) {
+        var errData = await resp.json();
+        throw new Error('Gemini 오류 (' + resp.status + '): ' +
+          (errData.error ? errData.error.message : resp.statusText));
+      }
+
+      var data    = await resp.json();
+      var rawText = data.candidates[0].content.parts[0].text || '';
+      rawText = rawText.replace('---END---', '').trim();
+
+      // 미리보기 표시
+      document.getElementById('previewText').textContent =
+        rawText.substring(0, 500) + (rawText.length > 500 ? '\n...' : '');
+      document.getElementById('previewWrap').style.display = 'block';
+
+      // Apps Script 메인 창으로 전달
+      setStep(3);
+      showProg('📤 변환 결과 전송 중...');
 
       if (!window.opener || window.opener.closed) {
         throw new Error('메인 창을 찾을 수 없습니다.');
       }
 
       window.opener.postMessage({
-        type        : 'RECORDER_AUDIO',
-        audioBase64 : base64,
+        type        : 'RECORDER_STT',   // ★ 텍스트만 전달 (오디오 아님)
+        rawText     : rawText,
         mimeType    : mimeType,
         duration    : elapsed,
-        fileName    : makeFileName()
-      }, TARGET_ORIGIN);
+        fileName    : makeFileName(),
+        sizeMB      : sizeMB
+      }, '*');
 
-      document.getElementById('prog').style.display  = 'none';
+      // 완료
+      hideProg();
       document.getElementById('done').style.display  = 'flex';
-      document.getElementById('state').textContent   = '';
-      setTimeout(function() { window.close(); }, 3000);
+      document.getElementById('doneSub').textContent =
+        rawText.length.toLocaleString() + '자 변환 완료! 이 창은 닫아도 됩니다.';
+      document.getElementById('stateMsg').textContent = '';
+      setTimeout(function(){ window.close(); }, 4000);
 
     } catch(err) {
-      document.getElementById('prog').style.display  = 'none';
-      document.getElementById('btnSend').disabled    = false;
-      showErr('전송 실패: ' + err.message);
+      hideProg();
+      showErr('변환/전송 실패: ' + err.message);
+      document.getElementById('btnSend').disabled  = false;
+      document.getElementById('stateMsg').textContent = '오류 발생';
     }
   }
 
   // ── 유틸 ──────────────────────────────────────────────
   function makeFileName() {
-    const d   = new Date();
-    const pad = function(n) { return String(n).padStart(2,'0'); };
-    return 'rec_' + d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate())
-         + '_' + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds()) + '.webm';
+    var d = new Date(), p = function(n){ return String(n).padStart(2,'0'); };
+    return 'rec_' + d.getFullYear() + p(d.getMonth()+1) + p(d.getDate())
+         + '_' + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds()) + '.webm';
   }
 
-  function toBase64(blob) {
+  function blobToBase64(blob) {
     return new Promise(function(resolve, reject) {
-      const r = new FileReader();
-      r.onloadend = function() { resolve(r.result.split(',')[1]); };
+      var r = new FileReader();
+      r.onloadend = function(){ resolve(r.result.split(',')[1]); };
       r.onerror   = reject;
       r.readAsDataURL(blob);
     });
   }
 
-  function errMsg(err) {
-    const map = {
-      'NotAllowedError' : '⛔ 마이크 권한이 거부되었습니다.\n주소창 왼쪽 아이콘 → 마이크 → 허용 후 새로고침해 주세요.',
-      'NotFoundError'   : '🎤 마이크를 찾을 수 없습니다.',
-      'NotReadableError': '⚠️ 마이크가 다른 앱에서 사용 중입니다.',
-      'SecurityError'   : '🔒 HTTPS 환경이 필요합니다.'
-    };
-    return map[err.name] || ('오류: ' + err.name + ' — ' + err.message);
+  function showProg(label) {
+    document.getElementById('progLbl').textContent    = label;
+    document.getElementById('progWrap').style.display = 'block';
   }
+  function hideProg() { document.getElementById('progWrap').style.display = 'none'; }
 
   function showErr(msg) {
-    const el = document.getElementById('err');
-    el.textContent = msg; el.style.display = 'block';
+    var el = document.getElementById('errBox');
+    el.innerHTML = msg.replace(/\n/g, '<br>');
+    el.style.display = 'block';
   }
-  function hideErr() { document.getElementById('err').style.display = 'none'; }
+  function hideErr() { document.getElementById('errBox').style.display = 'none'; }
+
+  function errMsg(err) {
+    var map = {
+      'NotAllowedError' : '⛔ 마이크 권한이 거부되었습니다.\n주소창 아이콘 → 마이크 → 허용 후 새로고침해 주세요.',
+      'NotFoundError'   : '🎤 마이크를 찾을 수 없습니다.',
+      'NotReadableError': '⚠️ 마이크가 다른 앱에서 사용 중입니다.'
+    };
+    return map[err.name] || ('마이크 오류: ' + err.name + ' — ' + err.message);
+  }
 </script>
 </body>
 </html>
